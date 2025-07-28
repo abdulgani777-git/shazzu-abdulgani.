@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎉 Happy Birthday Shazana 🎉</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: radial-gradient(#0f2027, #203a43, #2c5364);
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    h1.shine {
+      font-size: 3em;
+      background: linear-gradient(to right, #ff6ec4, #7873f5, #4ade80);
+      -webkit-background-clip: text;
+      color: transparent;
+      animation: shine 3s infinite;
+    }
+
+    @keyframes shine {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.5); }
+    }
+
+    .fade-in {
+      opacity: 0;
+      animation: fadeIn 2s forwards 1s;
+    }
+
+    .fade-in-delay {
+      opacity: 0;
+      animation: fadeIn 2s forwards 2s;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    .cake {
+      position: relative;
+      margin: 40px auto;
+      width: 120px;
+      height: 180px;
+    }
+
+    .layer {
+      position: absolute;
+      width: 100%;
+      height: 40px;
+      background: linear-gradient(#ff9a9e, #fad0c4);
+      border-radius: 10px;
+      box-shadow: 0 0 10px #fff;
+    }
+
+    .layer-bottom { top: 120px; }
+    .layer-middle { top: 80px; }
+    .layer-top { top: 40px; }
+
+    .plate {
+      position: absolute;
+      bottom: 0;
+      width: 140px;
+      height: 20px;
+      background: #fff;
+      border-radius: 10px;
+      left: -10px;
+    }
+
+    .candle {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 10px;
+      height: 30px;
+      background: #333;
+      transform: translateX(-50%);
+      border-radius: 3px;
+    }
+
+    .flame {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      width: 15px;
+      height: 15px;
+      background: radial-gradient(#ff0, #f00, transparent);
+      border-radius: 50%;
+      transform: translateX(-50%);
+      animation: flicker 0.3s infinite;
+    }
+
+    @keyframes flicker {
+      0%, 100% { transform: scale(1) translateX(-50%); }
+      50% { transform: scale(1.2) translateX(-50%); }
+    }
+
+    .footer {
+      font-size: 1.2em;
+      margin-top: 30px;
+      color: #4ade80;
+      text-shadow: 0 0 10px #4ade80;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="container">
+    <h1 class="shine">🎉 Happy Birthday Shazana 🎉</h1>
+  
+
+    <div class="cake fade-in-delay">
+      <div class="plate"></div>
+      <div class="layer layer-bottom"></div>
+      <div class="layer layer-middle"></div>
+      <div class="layer layer-top"></div>
+      <div class="candle">
+        <div class="flame"></div>
+      </div>
+    </div>
+
+    <p class="footer">From someone who deeply cares about you❤️</p>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const pieces = Array.from({ length: 150 }).map(() => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 6 + 2,
+      d: Math.random() * 100,
+      color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+      tilt: Math.random() * 10 - 10,
+      tiltAngleIncrement: Math.random() * 0.07 + 0.05,
+      tiltAngle: 0
+    }));
+
+    function drawConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let p of pieces) {
+        ctx.beginPath();
+        ctx.lineWidth = p.r;
+        ctx.strokeStyle = p.color;
+        ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+        ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+        ctx.stroke();
+      }
+      updateConfetti();
+      requestAnimationFrame(drawConfetti);
+    }
+
+    function updateConfetti() {
+      for (let p of pieces) {
+        p.tiltAngle += p.tiltAngleIncrement;
+        p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+        p.x += Math.sin(p.d);
+        p.tilt = Math.sin(p.tiltAngle) * 15;
+
+        if (p.y > canvas.height) {
+          p.y = -10;
+          p.x = Math.random() * canvas.width;
+        }
+      }
+    }
+
+    drawConfetti();
+  </script>
+</body>
+</html> 

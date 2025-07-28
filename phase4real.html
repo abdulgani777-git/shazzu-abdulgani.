@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Balloon Pop Game</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .cloud {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+    }
+
+    .game-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .balloon {
+      position: absolute;
+      width: 50px;
+      height: 60px;
+      background-color: #FF69B4;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      cursor: pointer;
+      transition: transform 0.1s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      color: white;
+    }
+
+    .balloon::before {
+      content: "";
+      position: absolute;
+      bottom: -5px;
+      left: 25px;
+      width: 2px;
+      height: 15px;
+      background-color: #333;
+    }
+
+    .dustbin {
+      position: absolute;
+      width: 40px;
+      height: 50px;
+      background-color: #555;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .dustbin::before {
+      content: "";
+      position: absolute;
+      top: -10px;
+      left: 5px;
+      width: 30px;
+      height: 8px;
+      background-color: #999;
+      border-radius: 5px;
+    }
+
+    .score-container {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 10px 15px;
+      border-radius: 20px;
+      display: flex;
+      gap: 15px;
+      z-index: 100;
+    }
+
+    .score, .mistakes {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .score span, .mistakes span {
+      color: #FF69B4;
+    }
+
+    .game-over {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+      color: white;
+    }
+
+    .game-over h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+      color: #FF69B4;
+    }
+
+    .game-over p {
+      font-size: 24px;
+      margin-bottom: 30px;
+    }
+
+    .retry-btn {
+      padding: 12px 30px;
+      background: #FF69B4;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .retry-btn:hover {
+      transform: scale(1.05);
+      background: #FF1493;
+    }
+
+    .heart {
+      position: absolute;
+      font-size: 20px;
+      color: #FF69B4;
+      pointer-events: none;
+      animation: float-up 1s forwards;
+    }
+
+    @keyframes float-up {
+      0% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100px);
+        opacity: 0;
+      }
+    }
+
+    .balloon-pop {
+      animation: pop 0.3s forwards;
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+      100% {
+        transform: scale(0);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .balloon {
+        width: 40px;
+        height: 50px;
+        font-size: 16px;
+      }
+
+      .dustbin {
+        width: 30px;
+        height: 40px;
+      }
+
+      .dustbin::before {
+        top: -8px;
+        left: 5px;
+        width: 20px;
+        height: 6px;
+      }
+
+      .score-container {
+        padding: 8px 12px;
+        gap: 10px;
+      }
+
+      .score, .mistakes {
+        font-size: 16px;
+      }
+
+      .game-over h1 {
+        font-size: 36px;
+      }
+
+      .game-over p {
+        font-size: 20px;
+      }
+
+      .retry-btn {
+        padding: 10px 25px;
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <div class="score-container">
+      <div class="score">Score: <span>0</span></div>
+      <div class="mistakes">Wrong: <span>0</span>/3</div>
+    </div>
+
+    <div class="game-over">
+      <h1>Game Over</h1>
+      <p>Your score: <span id="final-score">0</span></p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const gameContainer = document.querySelector('.game-container');
+      const scoreElement = document.querySelector('.score span');
+      const mistakesElement = document.querySelector('.mistakes span');
+      const gameOverScreen = document.querySelector('.game-over');
+      const finalScoreElement = document.querySelector('#final-score');
+      const retryBtn = document.querySelector('.retry-btn');
+
+      let score = 0;
+      let mistakes = 0;
+      let gameActive = true;
+      let spawnInterval = 1200;
+      let fallSpeed = 8;
+      let colors = ['#FF69B4', '#FFA500', '#9370DB', '#32CD32', '#FF6347'];
+      let emojis = ['🎈', '🎀', '🌸', '💝', '💖'];
+
+      function createClouds() {
+        for (let i = 0; i < 8; i++) {
+          const cloud = document.createElement('div');
+          cloud.className = 'cloud';
+          const size = Math.random() * 100 + 50;
+          cloud.style.width = `${size}px`;
+          cloud.style.height = `${size * 0.6}px`;
+          cloud.style.left = `${Math.random() * 100}%`;
+          cloud.style.top = `${Math.random() * 30}%`;
+          cloud.style.opacity = Math.random() * 0.5 + 0.3;
+          gameContainer.appendChild(cloud);
+          animateCloud(cloud);
+        }
+      }
+
+      function animateCloud(cloud) {
+        let x = parseFloat(cloud.style.left);
+        let direction = Math.random() > 0.5 ? 1 : -1;
+        let speed = Math.random() * 0.05 + 0.02;
+
+        function move() {
+          x += speed * direction;
+          if (x > 105 || x < -5) direction *= -1;
+          cloud.style.left = `${x}%`;
+          requestAnimationFrame(move);
+        }
+        move();
+      }
+
+      function spawnItem() {
+        if (!gameActive) return;
+
+        const isBalloon = Math.random() < 0.3;
+        const item = document.createElement('div');
+
+        if (isBalloon) {
+          item.className = 'balloon';
+          const color = colors[Math.floor(Math.random() * colors.length)];
+          const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+          item.style.backgroundColor = color;
+          item.textContent = emoji;
+          item.addEventListener('click', popBalloon);
+        } else {
+          item.className = 'dustbin';
+          item.addEventListener('click', wrongMove);
+        }
+
+        const startLeft = Math.random() * 80;
+        item.style.left = `${10 + startLeft}%`;
+        item.style.top = '-60px';
+        gameContainer.appendChild(item);
+
+        let currentTop = -60;
+
+        const fallAnimation = () => {
+          if (!gameActive) {
+            item.remove();
+            return;
+          }
+
+          currentTop += 2 + fallSpeed * 0.3;
+          item.style.top = `${currentTop}px`;
+
+          if (currentTop < window.innerHeight) {
+            requestAnimationFrame(fallAnimation);
+          } else {
+            if (item.classList.contains('balloon') && !item.classList.contains('popped')) {
+              mistakes++;
+              mistakesElement.textContent = mistakes;
+              if (mistakes >= 3) {
+                endGame(false);
+              }
+            }
+            item.remove();
+          }
+        };
+        requestAnimationFrame(fallAnimation);
+
+        spawnInterval = Math.max(200, spawnInterval * 0.95);
+        fallSpeed = Math.min(15, fallSpeed + 0.1);
+        setTimeout(spawnItem, spawnInterval);
+      }
+
+      function popBalloon(e) {
+        if (!gameActive) return;
+
+        const balloon = e.target;
+        balloon.classList.add('popped'); // ✅ Prevents false "missed balloon"
+        balloon.classList.add('balloon-pop');
+
+        for (let i = 0; i < 3; i++) createHeart(balloon);
+
+        score++;
+        scoreElement.textContent = score;
+
+        if (score === 10) {
+          endGame(true);
+        }
+
+        setTimeout(() => balloon.remove(), 300);
+      }
+
+      function wrongMove(e) {
+        if (!gameActive) return;
+
+        if (e.target.classList.contains('dustbin')) {
+          mistakes++;
+          mistakesElement.textContent = mistakes;
+          if (mistakes >= 3) {
+            endGame(false);
+          }
+        }
+      }
+
+      function createHeart(balloon) {
+        const rect = balloon.getBoundingClientRect();
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.innerHTML = '❤️';
+        heart.style.left = `${rect.left + rect.width / 2}px`;
+        heart.style.top = `${rect.top + rect.height / 2}px`;
+        gameContainer.appendChild(heart);
+        setTimeout(() => heart.remove(), 1000);
+      }
+
+      function endGame(isWin) {
+  gameActive = false;
+  finalScoreElement.textContent = score;
+  const title = document.querySelector('.game-over h1');
+  gameOverScreen.innerHTML = ''; // Clear previous elements
+
+  title.textContent = isWin ? 'Oi Shazzu, You Won!' : 'Oops Shazzu, You Lost!';
+  gameOverScreen.appendChild(title);
+
+  const scoreText = document.createElement("p");
+  scoreText.innerHTML = `Your score: <span id="final-score">${score}</span>`;
+  gameOverScreen.appendChild(scoreText);
+
+  if (isWin) {
+    const winMsg = document.createElement("p");
+    winMsg.innerText = "Want to play more games?";
+    winMsg.style.fontSize = "22px";
+    winMsg.style.marginBottom = "20px";
+    gameOverScreen.appendChild(winMsg);
+
+    const yesButton = document.createElement("button");
+    yesButton.innerText = "Yes";
+    yesButton.classList.add("retry-btn");
+    yesButton.onclick = () => window.location.href = "phase5.html";
+    gameOverScreen.appendChild(yesButton);
+
+    const noButton = document.createElement("button");
+    noButton.innerText = "No";
+    noButton.classList.add("retry-btn");
+    noButton.onclick = () => noButton.remove();
+    gameOverScreen.appendChild(noButton);
+  } else {
+    const tryAgainBtn = document.createElement("button");
+    tryAgainBtn.innerText = "Try Again";
+    tryAgainBtn.classList.add("retry-btn");
+    tryAgainBtn.onclick = () => location.reload(); // or call resetGame()
+    gameOverScreen.appendChild(tryAgainBtn);
+  }
+
+  gameOverScreen.style.display = 'flex';
+}
+      function resetGame() {
+        document.querySelectorAll('.balloon, .dustbin').forEach(el => el.remove());
+        score = 0;
+        mistakes = 0;
+        gameActive = true;
+        spawnInterval = 1500;
+        fallSpeed = 6;
+        scoreElement.textContent = '0';
+        mistakesElement.textContent = '0';
+        gameOverScreen.style.display = 'none';
+        spawnItem();
+      }
+
+      createClouds();
+      spawnItem();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose a Gift Box 🎁</title>
+    <style>
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            overflow: hidden;
+        }
+        
+        .floating {
+            position: absolute;
+            opacity: 0.8;
+            animation: floating 10s infinite ease-in-out;
+        }
+        
+        @keyframes floating {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(20px, 20px) rotate(5deg);
+            }
+            50% {
+                transform: translate(0, 40px) rotate(0deg);
+            }
+            75% {
+                transform: translate(-20px, 20px) rotate(-5deg);
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(to right, #ffafbd, #ffc3a0);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        h1 {
+            color: #d5006d;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        .gift-box {
+            background-color: #d5006d;
+            border-radius: 15px;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            font-size: 2rem;
+            color: white;
+        }
+        
+        .gift-box:hover {
+            transform: scale(1.05) rotate(-2deg);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            filter: brightness(1.1);
+            transition: all 0.2s ease-out;
+        }
+        
+        .gift-box::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 20px;
+            background-color: rgba(255,255,255,0.3);
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .message-content {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s ease;
+            z-index: 2;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            font-size: 1.2rem;
+        }
+        
+        .gift-emoji {
+            font-size: 3rem;
+            transition: all 0.5s ease;
+        }
+        
+        .gift-box.open .gift-emoji {
+            opacity: 0;
+            transform: scale(0);
+        }
+        
+        .gift-box.open .message-content {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .gift-box.open {
+            background-color: #4caf50;
+            color: white;
+            animation: 
+                openBox 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards,
+                fadeIn 0.5s ease-in forwards;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            opacity: 0.95;
+        }
+        
+        @keyframes openBox {
+            0% { transform: rotate(0deg) scale(1); }
+            10% { transform: rotate(-3deg) scale(1.05); }
+            20% { transform: rotate(3deg) scale(1.1); }
+            30% { transform: rotate(-3deg) scale(1.1); }
+            40% { transform: rotate(3deg) scale(1.1); }
+            50% { transform: rotate(0deg) scale(1.1); }
+            100% { transform: rotate(0deg) scale(1); }
+        }
+        
+       
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .gift-box {
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+    <h1>Choose a Gift Box 🎁</h1>
+    <div class="container" id="giftContainer">
+        <!-- Gift boxes will be added by JavaScript -->
+    </div>
+
+
+    <script>
+        // Load confetti library
+        // Remove async loading and use direct script reference
+        // Confetti will be available through window.confetti
+
+        const messages = [
+            "You are a beautiful creation of Allah.",
+            "Your presence brings peace to my heart",
+            "I love you soooo much..!!",
+            "You are stronger than you think",
+            "Your smile alone makes me happy.",
+            "You are the prettiest girl I've ever seen 🎀",
+            "You are beautiful than you imagine",
+            "You are the cutest girlll😙💌",
+            "You are my moon 🌙♥️"
+        ];
+        
+        const giftContainer = document.getElementById('giftContainer');
+        let openedBoxes = 0;
+        // Create gift boxes
+        function createGiftBoxes() {
+    giftContainer.innerHTML = '';
+    const shuffledMessages = [...messages].sort(() => Math.random() - 0.5);
+    
+    shuffledMessages.forEach((message) => {
+        const giftBox = document.createElement('div');
+        giftBox.className = 'gift-box';
+        giftBox.setAttribute('data-message', message);
+
+        const emoji = document.createElement('div');
+        emoji.textContent = "🎁";
+        emoji.className = "gift-emoji";
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message-content';
+        messageDiv.textContent = message;
+
+        giftBox.appendChild(emoji);
+        giftBox.appendChild(messageDiv);
+
+        giftBox.addEventListener('click', function () {
+            if (!this.classList.contains('open')) {
+                this.classList.add('open');
+
+                openedBoxes++;
+
+                setTimeout(() => {
+    if (window.confetti) {
+        confetti({
+            particleCount: 30,
+            spread: 60,
+            origin: { y: 0.6 },
+            decay: 0.9
+        });
+    }
+}, 200);
+                if (openedBoxes === messages.length) {
+    setTimeout(() => {
+        confetti({
+            particleCount: 200,
+            spread: 100,
+            origin: { y: 0.5 },
+            decay: 0.9
+        });
+
+        setTimeout(() => {
+            window.location.href = "phase6.html";
+        }, 2000); // redirect after confetti
+    }, 300);
+}
+            }
+        });
+
+        giftContainer.appendChild(giftBox); // ❗ Missing in your original code
+    });
+}
+        
+        // Reset gift boxes
+        
+        
+        // Remove sound for now since we don't have the file reference
+       
+        // Create floating stars/hearts
+        function createFloatingElements() {
+            const types = ['★', '❤️', '✦', '❉', '✧'];
+            const container = document.body;
+            
+            for (let i = 0; i < 30; i++) {
+                const element = document.createElement('div');
+                element.className = 'floating';
+                element.textContent = types[Math.floor(Math.random() * types.length)];
+                element.style.color = `hsl(${Math.random() * 60 + 330}, 70%, 75%)`;
+                element.style.fontSize = `${Math.random() * 20 + 10}px`;
+                element.style.left = `${Math.random() * 100}%`;
+                element.style.top = `${Math.random() * 100}%`;
+                element.style.animationDuration = `${Math.random() * 10 + 10}s`;
+                element.style.animationDelay = `${Math.random() * 5}s`;
+                container.appendChild(element);
+            }
+        }
+
+        // Initialize
+        createGiftBoxes();
+        createFloatingElements();
+    </script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</body>
+</html>
